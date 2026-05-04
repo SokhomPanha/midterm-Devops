@@ -1,0 +1,27 @@
+services:
+  jenkins:
+    build: .
+    container_name: jenkins-midter
+    restart: always
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  jenkins-agent:
+    image: jenkins/ssh-agent:latest
+    container_name: jenkins-agent
+    privileged: true
+    user: root
+    ports:
+      - "5434:5432"
+    command: >
+      bash -c "apt-get update && 
+               apt-get install -y postgresql-client postgresql && 
+               service postgresql start && 
+               /usr/local/bin/setup-sshd"
+
+volumes:
+  jenkins_home:
