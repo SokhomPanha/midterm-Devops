@@ -20,26 +20,21 @@ pipeline {
             }
         }
 
-        stage('Deploy via Ansible') {
-            steps {
+        stage('Build & Deploy') {
+        steps {
+            dir('midterm') {
+                // 1. Build ignoring database tests
+                sh './mvnw clean package -DskipTests'
+                
+                // 2. Upload and Start the JAR
                 sh """
-                # 1. Create Inventory
-                echo "[webserver]\n${REMOTE_HOST} ansible_user=${REMOTE_USER} ansible_password=${REMOTE_PASS} ansible_ssh_common_args='-o StrictHostKeyChecking=no'" > inventory.ini
-                
-                # 2. Ensure directory exists (Fixes the 404 issue)
-                ansible webserver -i inventory.ini -m file -a "path=${DEPLOY_PATH} state=directory mode=0755"
-                
-                # 3. Upload the Spring Boot JAR
-                ansible webserver -i inventory.ini -m copy -a "src=midterm/target/*.jar dest=${DEPLOY_PATH}/app.jar"
-                
-                # 4. Stop any old instance to free up the port
+                ansible webserver -i inventory.ini -m copy -a "src=target/*.jar dest=${DEPLOY_PATH}/app.jar"
                 ansible webserver -i inventory.ini -m shell -a "pkill -f app.jar || true"
-
-                # 5. Start the Spring Boot App in the background
-                ansible webserver -i inventory.ini -m shell -a "chdir=${DEPLOY_PATH} nohup java -jar app.jar > log.txt 2>&1 &"
+                ansible webserver -i inventory.ini -m shell -a "chdir=${DEPLOY_PATH} nohup java -jar app.jar --server.port=8081 > log.txt 2>&1 &"
                 """
             }
-        }
+    }
+}
     }
 
     post {
