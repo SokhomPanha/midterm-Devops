@@ -21,20 +21,29 @@ pipeline {
         }
 
         stage('Build & Deploy') {
-        steps {
-            dir('midterm') {
-                // 1. Build ignoring database tests
-                sh './mvnw clean package -DskipTests'
-                
-                // 2. Upload and Start the JAR
-                sh """
-                ansible webserver -i inventory.ini -m copy -a "src=target/*.jar dest=${DEPLOY_PATH}/app.jar"
-                ansible webserver -i inventory.ini -m shell -a "pkill -f app.jar || true"
-                ansible webserver -i inventory.ini -m shell -a "chdir=${DEPLOY_PATH} nohup java -jar app.jar --server.port=8081 > log.txt 2>&1 &"
-                """
+            steps {
+                dir('midterm') {
+                    // 1. Build ignoring database tests
+                    sh './mvnw clean package -DskipTests'
+                    
+                    // 2. Upload and Start the JAR
+                    sh """
+                    ansible webserver -i inventory.ini -m copy -a "src=target/*.jar dest=${DEPLOY_PATH}/app.jar"
+                    ansible webserver -i inventory.ini -m shell -a "pkill -f app.jar || true"
+                    ansible webserver -i inventory.ini -m shell -a "chdir=${DEPLOY_PATH} nohup java -jar app.jar --server.port=8081 > log.txt 2>&1 &"
+                    """
+                }
+
             }
-    }
-}
+        }
+        stage('Deploy') {
+            steps {
+                sh '''
+                scp midterm/target/*.war root@178.128.93.188:/var/www/html/Midterm-2026/Sokhom_Panha/app.war
+                ssh root@178.128.93.188 "pkill -f app.war || true; nohup java -jar /var/www/html/Midterm-2026/Sokhom_Panha/app.war --spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration > /var/www/html/Midterm-2026/Sokhom_Panha/log.txt 2>&1 &"
+                '''
+            }
+        }
     }
 
     post {
@@ -43,7 +52,7 @@ pipeline {
             emailext (
                 subject: "SUCCESS: Midterm Build # ${env.BUILD_NUMBER}",
                 body: "Your Spring Boot app is live: ${env.APP_URL}",
-                to: "your-email@gmail.com" 
+                to: "sokhompanha70@gmail.com" 
             )
         }
         failure {
@@ -51,7 +60,7 @@ pipeline {
             emailext (
                 subject: "FAILED: Midterm Build # ${env.BUILD_NUMBER}",
                 body: "Build failed. Check logs: ${env.BUILD_URL}",
-                to: "your-email@gmail.com"
+                to: "sokhompanha70@gmail.com"
             )
         }
     }
