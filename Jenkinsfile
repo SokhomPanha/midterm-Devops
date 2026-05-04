@@ -11,8 +11,8 @@ pipeline {
     stages {
         stage('Build & Test') {
             steps {
-                // Using the Maven wrapper in your repo
-                sh 'chmod +x mvnw && ./mvnw clean package'
+                sh 'chmod +x mvnw'
+                sh './mvnw clean package'
             }
         }
 
