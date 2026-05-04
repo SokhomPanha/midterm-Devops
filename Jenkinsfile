@@ -19,18 +19,17 @@ pipeline {
         stage('Deploy via Ansible') {
             steps {
                 sh """
-                # 1. Prepare Inventory
+                # 1. Create the inventory for the new server
                 echo "[webserver]\n${REMOTE_HOST} ansible_user=${REMOTE_USER} ansible_password=${REMOTE_PASS} ansible_ssh_common_args='-o StrictHostKeyChecking=no'" > inventory.ini
                 
-                # 2. Automated MKDIR (Same as 'mkdir -p' in your friend's screenshot)
+                # 2. Create the directory (Fixes the 404 by ensuring the path exists)
                 ansible webserver -i inventory.ini -m file -a "path=${DEPLOY_PATH} state=directory mode=0755"
                 
-                # 3. Automated ECHO (Same as 'echo' in your friend's screenshot)
-                # This ensures the 404 disappears and shows your name instead
+                # 3. Create the index.html (This is what 'curl' will see)
                 ansible webserver -i inventory.ini -m shell -a "echo 'Sokhom Panha OK' > ${DEPLOY_PATH}/index.html"
                 
-                # 4. Upload your actual project file
-                ansible webserver -i inventory.ini -m copy -a "src=midterm/target/*.war dest=${DEPLOY_PATH}/app.war"
+                # 4. Upload your project file
+                ansible webserver -i inventory.ini -m copy -a "src=target/*.war dest=${DEPLOY_PATH}/app.war"
                 """
             }
         }
