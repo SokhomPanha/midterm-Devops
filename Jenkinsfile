@@ -19,9 +19,20 @@ pipeline {
         stage('Deploy via Ansible') {
             steps {
                 sh """
+                # 1. Create the inventory file
                 echo "[webserver]\n${REMOTE_HOST} ansible_user=${REMOTE_USER} ansible_password=${REMOTE_PASS} ansible_ssh_common_args='-o StrictHostKeyChecking=no'" > inventory.ini
-                ansible webserver -i inventory.ini -m file -a "path=${DEPLOY_PATH} state=directory"
-                ansible webserver -i inventory.ini -m copy -a "src=target/*.jar dest=${DEPLOY_PATH}/app.jar"
+                
+                # 2. Create the directory (This replaces the need to do it manually)
+                ansible webserver -i inventory.ini -m file -a "path=${DEPLOY_PATH} state=directory mode=0755"
+                
+                # 3. Upload the application
+                ansible webserver -i inventory.ini -m copy -a "src=midterm/target/*.war dest=${DEPLOY_PATH}/app.war"
+                
+                # 4. Create an index.html so the website actually shows something (Fixes 404)
+                ansible webserver -i inventory.ini -m shell -a "echo '<h1>Deployment Successful - Sokhom Panha</h1>' > ${DEPLOY_PATH}/index.html"
+                
+                # 5. Fix ownership for Nginx
+                ansible webserver -i inventory.ini -m shell -a "chown -R www-data:www-data ${DEPLOY_PATH}"
                 """
             }
         }
