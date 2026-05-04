@@ -13,9 +13,9 @@ pipeline {
     stages {
         stage('Build Spring Boot') {
             steps {
-                // Navigates to your project folder and builds the JAR
                 dir('midterm') {
-                    sh 'mvn clean package -DskipTests'
+                    // Add -DskipTests to avoid the PostgreSQL connection error
+                    sh './mvnw clean package -DskipTests'
                 }
             }
         }
