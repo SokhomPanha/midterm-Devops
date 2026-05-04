@@ -8,5 +8,6 @@ public class HelloController {
 
     @GetMapping("/")
     public String hello() {
+        return "HELLO MIDTERM 2026 DEVOPS";
     }
 }
