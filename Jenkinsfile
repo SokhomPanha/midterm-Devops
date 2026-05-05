@@ -6,8 +6,8 @@ pipeline {
         REMOTE_HOST = "178.128.93.188"
         REMOTE_USER = "root"
         REMOTE_PASS = credentials('server-password') 
-        DEPLOY_PATH = "/var/www/html/Midterm-2026/Sokhom_Panha"
-        APP_URL     = "[http://178.128.93.188/Midterm-2026/Sokhom_Panha]"
+        DEPLOY_PATH = "/var/www/html/Midterm-2026/sokhom_panha"
+        APP_URL     = "[http://178.128.93.188/Midterm-2026/sokhom_panha]"
     }
 
     stages {
@@ -39,8 +39,8 @@ pipeline {
         stage('Deploy') {
             steps {
                 sh '''
-                scp midterm/target/*.war root@178.128.93.188:/var/www/html/Midterm-2026/Sokhom_Panha/app.war
-                ssh root@178.128.93.188 "pkill -f app.war || true; nohup java -jar /var/www/html/Midterm-2026/Sokhom_Panha/app.war --spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration > /var/www/html/Midterm-2026/Sokhom_Panha/log.txt 2>&1 &"
+                scp midterm/target/*.war root@178.128.93.188:/var/www/html/Midterm-2026/sokhom_panha/app.war
+                ssh root@178.128.93.188 "pkill -f app.war || true; nohup java -jar /var/www/html/Midterm-2026/sokhom_panha/app.war --spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration > /var/www/html/Midterm-2026/sokhom_panha/log.txt 2>&1 &"
                 '''
             }
         }
