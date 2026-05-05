@@ -7,7 +7,7 @@ pipeline {
         REMOTE_USER = "root"
         REMOTE_PASS = credentials('server-password') 
         DEPLOY_PATH = "/var/www/html/Midterm-2026/sokhom_panha"
-        APP_URL     = "[http://178.128.93.188/Midterm-2026/sokhom_panha]"
+        APP_URL     = "http://178.128.93.188/Midterm-2026/sokhom_panha"
     }
 
     stages {
